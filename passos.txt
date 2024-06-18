@@ -1,0 +1,35 @@
+Estados (S):
+- construa uma representação daquilo que você quer
+    - Ou seja, construir uma classe S (state) capaz de armazenar o seu dado
+- Defina uma função de recompensa
+    - Faça uma função que receba S e retorne sua recompensa:
+        - Caso S não seja um estado terminal, retorne 0
+        - Caso S seja um estado terminal, retorne um arbitrário, que depende da recompensa utilizada
+- Defina uma representação tensorial de S:
+    - "torch.tensor([s for s in sorted(allS)]).float()" retorna um tensor binário com a existência ou não de algum elemento no estado
+
+Modelo:
+- Construa um modelo torch
+- Defina no forward a função recompensa
+- Defina a função de perda
+- Inicie o modelo F
+- Inicie o otimizador (Adam)
+- Comece a iterar episódios (caminhos do estado inicial até algum estado terminal):
+    - state = vazio
+    - Colete o flow F(s)
+    - Comece a iterar passos (aqui pode ser uma quantidade fixa de passos "range(n)" ou alguma outra regra):
+        - utilize a política (flow/flow.sum())
+        - Colete a ação "torch.distributions.Categorical(probs).sample()"
+        - Atualize o estado com a ação coletada
+        - Colete o novo flow F(s)
+        - Colete recompensa(s)
+        - Colete recompensa(pai_s) # recompensa do pai de s
+        - Calcule a perda como: recompensa(pai_s) - recompensa(s) - flow(s)
+        - Registre a perda
+    - Dê o passo:
+        - losses.append(minibatch_loss.item())
+        - minibatch_loss.backward()
+        - opt.step()
+        - opt.zero_grad()
+        - minibatch_loss = 0
+
